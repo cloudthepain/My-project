@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 1102781169}
   - component: {fileID: 2856625370828654048}
   - component: {fileID: 199025871540018175}
+  - component: {fileID: 4540038903614384077}
   m_Layer: 0
   m_Name: Square
   m_TagString: Untagged
@@ -123,9 +124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72880c8399787ec4ca0f4e02a27c9947, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerSpeed: 100
   spawnPoint: {fileID: 4953810118145958865, guid: 5ec7de78e71bb3a4f88b5da441a487c4, type: 3}
-  JumpPower: {x: 0, y: 3, z: 0}
 --- !u!61 &1102781168
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -206,3 +205,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80d7c879794dfda4687da0e400131852, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4540038903614384077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 312029466612788421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f296cbb0f435f24fb1ba3a8bb72ec41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerHealth:
+    m_InternalValue: 0
+  playerMana:
+    m_InternalValue: 0
+  playerAttack:
+    m_InternalValue: 0
+  playerSpeed:
+    m_InternalValue: 0
+  jumpPower:
+    m_InternalValue: 0

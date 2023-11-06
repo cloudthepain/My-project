@@ -9,16 +9,21 @@ using UnityEngine.UI;
 public class ServerPlayer : NetworkBehaviour
 {
     MyPlayerActions inputActions;
-    [SerializeField] float playerSpeed;
     [SerializeField] Transform spawnPoint;
-    [SerializeField] Vector3 JumpPower = new Vector3 ();
+    PlayerStats playerStats;
     bool isGrounded;
+    bool canJump;
+    Rigidbody2D rb;
 	// Start is called before the first frame update
 
 	void Start()
     {
         inputActions = new();
         inputActions.Enable();
+        inputActions.Player.Jump.performed += OnJumpPerformed;
+        playerStats = GetComponent<PlayerStats>();
+        rb = GetComponent<Rigidbody2D>();
+        canJump = true;
 	}
 
 	public override void OnNetworkSpawn()
@@ -31,7 +36,7 @@ public class ServerPlayer : NetworkBehaviour
     {
         if(!IsOwner) return;
 		Vector2 input = inputActions.Player.Movement.ReadValue<Vector2>();
-		
+
         if (IsServer && IsLocalPlayer)
         {
 			Move(input);
@@ -45,20 +50,33 @@ public class ServerPlayer : NetworkBehaviour
     void Move(Vector3 _input)
     {
         _input.Normalize();
-        if (_input.y > 0) Jump(); 
-        if(_input.y < 0) return;
-		transform.position += _input * Time.deltaTime * playerSpeed;
+        Debug.Log(_input);
+        rb.AddForce(new Vector2(_input.x,0));
     }
 
-    void Jump()
-    {
-        transform.position += JumpPower * Time.deltaTime * playerSpeed;
-    }
+
 
     [ServerRpc]
     void MoveServerRpc(Vector2 _input) 
     {
-        Debug.Log("This is called: " +_input);
         Move(_input);
     }
+	private void OnJumpPerformed(InputAction.CallbackContext context)
+	{
+		if (IsServer && IsLocalPlayer)
+		{
+			if (!canJump) { return; }
+			rb.AddForce(new Vector2(0, 10), ForceMode2D.Impulse);
+		}
+		else if (IsClient && IsLocalPlayer)
+		{
+            OnJumpPerformedServerRpc();
+		}
+	}
+    [ServerRpc]
+    void OnJumpPerformedServerRpc()
+    {
+		if (!canJump) { return; }
+		rb.AddForce(new Vector2(0, 100), ForceMode2D.Impulse);
+	}
 }
