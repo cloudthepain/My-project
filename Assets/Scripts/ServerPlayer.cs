@@ -11,9 +11,7 @@ public class ServerPlayer : NetworkBehaviour
     MyPlayerActions inputActions;
     [SerializeField] Transform spawnPoint;
     PlayerStats playerStats;
-    bool isGrounded;
-    bool canJump;
-    Rigidbody2D rb;
+    public Rigidbody2D rb;
 	// Start is called before the first frame update
 
 	void Start()
@@ -23,7 +21,6 @@ public class ServerPlayer : NetworkBehaviour
         inputActions.Player.Jump.performed += OnJumpPerformed;
         playerStats = GetComponent<PlayerStats>();
         rb = GetComponent<Rigidbody2D>();
-        canJump = true;
 	}
 
 	public override void OnNetworkSpawn()
@@ -34,9 +31,11 @@ public class ServerPlayer : NetworkBehaviour
 	// Update is called once per frame
 	void Update()
     {
-        if(!IsOwner) return;
-		Vector2 input = inputActions.Player.Movement.ReadValue<Vector2>();
+		Debug.Log(NetworkObject.IsOwner);
+		if (!NetworkObject.IsOwner) { return; }
 
+		Vector2 input = inputActions.Player.Movement.ReadValue<Vector2>();
+		Debug.Log(input);
         if (IsServer && IsLocalPlayer)
         {
 			Move(input);
@@ -47,26 +46,36 @@ public class ServerPlayer : NetworkBehaviour
 		}
     }
 
-    void Move(Vector3 _input)
+    void Move(Vector2 _input)
     {
         _input.Normalize();
-        Debug.Log(_input);
         rb.AddForce(new Vector2(_input.x,0));
     }
 
+	[ServerRpc]
+	void MoveServerRpc(Vector2 _input)
+	{
+		Move(_input);
+	}
 
 
-    [ServerRpc]
-    void MoveServerRpc(Vector2 _input) 
-    {
-        Move(_input);
-    }
+		void OnCollisionEnter2D(Collision2D collision)
+	{
+		if(!IsLocalPlayer) return;
+		if (collision.gameObject.tag == "Ground")
+		{
+			playerStats.isGrounded.Value = true;
+			Debug.Log("Landed: " + playerStats.isGrounded.Value);
+		}
+	}
 	private void OnJumpPerformed(InputAction.CallbackContext context)
 	{
 		if (IsServer && IsLocalPlayer)
 		{
-			if (!canJump) { return; }
-			rb.AddForce(new Vector2(0, 10), ForceMode2D.Impulse);
+			if (!playerStats.isGrounded.Value) { return; }
+			rb.AddForce(new Vector2(0, playerStats.jumpPower.Value), ForceMode2D.Impulse);
+			playerStats.isGrounded.Value = false;
+			Debug.Log("Jumping");
 		}
 		else if (IsClient && IsLocalPlayer)
 		{
@@ -76,7 +85,9 @@ public class ServerPlayer : NetworkBehaviour
     [ServerRpc]
     void OnJumpPerformedServerRpc()
     {
-		if (!canJump) { return; }
-		rb.AddForce(new Vector2(0, 100), ForceMode2D.Impulse);
+		if (!playerStats.isGrounded.Value) { return; }
+		rb.AddForce(new Vector2(0, playerStats.jumpPower.Value), ForceMode2D.Impulse);
+        playerStats.isGrounded.Value = false;
+        Debug.Log("Jumping");
 	}
 }

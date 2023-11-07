@@ -10,6 +10,7 @@ public class PlayerStats : NetworkBehaviour
 	public NetworkVariable<float> playerAttack;
 	public NetworkVariable<float> playerSpeed;
 	public NetworkVariable<float> jumpPower;
+	public NetworkVariable<bool> isGrounded;
 
 	public override void OnNetworkSpawn()
 	{
@@ -18,6 +19,7 @@ public class PlayerStats : NetworkBehaviour
 		playerMana.Value = 0;
 		playerAttack.Value = 0;
 		playerSpeed.Value = 20;
-		jumpPower.Value = 20;
+		jumpPower.Value = 9;
+		isGrounded.Value = true;
 	}
 }
